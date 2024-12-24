@@ -1,0 +1,15 @@
+user:
+  name: Sweetuezuro0000
+  github: Sweetuezuro0000 
+language: "python"
+python_version: "3.10"
+
+commands:
+  build:
+    - "pip install -r requirements.txt"
+  package:
+    - "ffmpeg build-essential"
+  start:
+    - "python3 -m pyUltroid"
+  env:
+    - "ENVIRONMENT=production"
