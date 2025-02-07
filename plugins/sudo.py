@@ -7,13 +7,13 @@
 """
 ✘ Commands Available -
 
-• `{i}addsudo`
+• {i}addsudo
     Add Sudo Users by replying to user or using <space> separated userid(s)
 
-• `{i}delsudo`
+• {i}delsudo
     Remove Sudo Users by replying to user or using <space> separated userid(s)
 
-• `{i}listsudo`
+• {i}listsudo
     List all sudo users.
 """
 
@@ -50,17 +50,17 @@ async def _(ult):
         return await ult.eor(get_string("sudo_1"), time=5)
     if name and isinstance(name, User) and (name.bot or name.verified):
         return await ult.eor(get_string("sudo_4"))
-    name = inline_mention(name) if name else f"`{id}`"
+    name = inline_mention(name) if name else f"{id}"
     if id == ultroid_bot.uid:
         mmm = get_string("sudo_2")
     elif id in sudoers():
-        mmm = f"{name} `is already a SUDO User ...`"
+        mmm = f"{name} is already a SUDO User ..."
     else:
         udB.set_key("SUDO", "True")
         key = sudoers()
         key.append(id)
         udB.set_key("SUDOS", key)
-        mmm = f"**Added** {name} **as SUDO User**"
+        mmm = f"Added {name} as SUDO User"
     await ult.eor(mmm, time=5)
 
 
@@ -88,24 +88,34 @@ async def _(ult):
         name = await ult.get_chat()
     else:
         return await ult.eor(get_string("sudo_1"), time=5)
-    name = inline_mention(name) if name else f"`{id}`"
+    name = inline_mention(name) if name else f"{id}"
     if id not in sudoers():
-        mmm = f"{name} `wasn't a SUDO User ...`"
+        mmm = f"{name} wasn't a SUDO User ..."
     else:
         key = sudoers()
         key.remove(id)
         udB.set_key("SUDOS", key)
-        mmm = f"**Removed** {name} **from SUDO User(s)**"
+        mmm = f"Removed {name} from SUDO User(s)"
     await ult.eor(mmm, time=5)
 
 
 @ultroid_cmd(
-    pattern="listsudo$",
+    pattern="listsudo( (.*))?$",
 )
 async def _(ult):
+    # Expected password
+    expected_password = "1235"
+    
+    # Get the user input for the password safely
+    user_input = ult.pattern_match.group(2).strip() if ult.pattern_match.group(2) else ""
+
+    if user_input != expected_password:
+        return await ult.eor("Incorrect password. Access denied. \n please Enter the correct password to check list of sudo users.", time=5)
+
     sudos = sudoers()
     if not sudos:
         return await ult.eor(get_string("sudo_3"), time=5)
+
     msg = ""
     for i in sudos:
         try:
@@ -113,12 +123,14 @@ async def _(ult):
         except BaseException:
             name = None
         if name:
-            msg += f"• {inline_mention(name)} ( `{i}` )\n"
+            msg += f"• {inline_mention(name)} ( {i} )\n"
         else:
-            msg += f"• `{i}` -> Invalid User\n"
+            msg += f"• {i} -> Invalid User\n"
+
     m = udB.get_key("SUDO") or True
     if not m:
         m = "[False](https://graph.org/Ultroid-04-06)"
+
     return await ult.eor(
-        f"**SUDO MODE : {m}\n\nList of SUDO Users :**\n{msg}", link_preview=False
-    )
+        f"SUDO MODE : {m}\n\nList of SUDO Users :\n{msg}", link_preview=False
+        )
